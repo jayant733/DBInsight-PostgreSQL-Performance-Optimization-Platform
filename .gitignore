@@ -1,0 +1,17 @@
+.DS_Store
+
+# Local PostgreSQL and experiment output
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Temporary files
+tmp/
+temp/
