@@ -1,0 +1,7 @@
+-- Q4 Execution Sequence
+-- 01 -> 02 -> 03 -> 04 -> 05 -> 06 -> 07 -> 08 -> 08b -> 09 -> 10 -> 11 -> 12 -> 13
+-- 02 reproduces baseline without Q4 index inside a transaction.
+-- RANK() is applied after per-product revenue aggregation completes.
+-- 05/06/07: Hash/Nested Loop/Merge Join comparisons for tuned query
+-- 08: Forced Bitmap Heap Scan on status index. Run 08b in the same editor after capture
+-- 09: Create/refresh Product Cumulative Revenue MV
