@@ -1,0 +1,7 @@
+-- Q2 Execution Sequence
+-- 01 -> 02 -> 03 -> 04 -> 05 -> 06 -> 07 -> 08 -> 08b -> 09 -> 10 -> 11
+--
+-- 05/06/07: Hash/Nested Loop/Merge Join comparisons for tuned query
+-- 08: Forced Bitmap Heap Scan comparison. Run 08b immediately afterwards in the same editor
+-- 09: Create/refresh monthly report Materialized View
+-- Execute each file in DBeaver with Option(⌥)+X / Alt+X.
