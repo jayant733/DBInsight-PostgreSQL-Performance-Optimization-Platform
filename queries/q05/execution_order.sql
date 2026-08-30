@@ -1,0 +1,5 @@
+-- Q5 Execution Sequence
+-- 01 -> 02 -> 03 -> 04 -> 05 -> 06 -> 07 -> 08 -> 08b -> 09 -> 10 -> 11 -> 12
+-- 05/06/07: Hash/Nested Loop/Merge Join comparisons for tuned query
+-- 08: Forced Bitmap Heap Scan on status index. Run 08b in the same editor after capture
+-- 09: Create/refresh MV for recurring RFM reporting
