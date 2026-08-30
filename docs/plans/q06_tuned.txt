@@ -1,0 +1,40 @@
+                                                             QUERY PLAN                                                             
+------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=446.18..446.20 rows=1 width=48) (actual time=2.362..2.364 rows=1 loops=1)
+   Buffers: shared hit=78
+   CTE first_orders
+     ->  HashAggregate  (cost=105.88..131.86 rows=2598 width=16) (actual time=0.523..0.633 rows=2247 loops=1)
+           Group Key: orders.customer_id
+           Batches: 1  Memory Usage: 369kB
+           Buffers: shared hit=39
+           ->  Seq Scan on orders  (cost=0.00..90.84 rows=3009 width=16) (actual time=0.004..0.292 rows=3009 loops=1)
+                 Filter: (order_status = ANY ('{paid,shipped,delivered}'::text[]))
+                 Rows Removed by Filter: 761
+                 Buffers: shared hit=39
+   CTE customer_repurchase
+     ->  HashAggregate  (cost=303.92..306.52 rows=260 width=24) (actual time=1.785..1.891 rows=2247 loops=1)
+           Group Key: f.customer_id, f.first_order_ts
+           Batches: 1  Memory Usage: 369kB
+           Buffers: shared hit=78
+           ->  Hash Left Join  (cost=128.45..284.43 rows=2598 width=24) (actual time=0.958..1.499 rows=2779 loops=1)
+                 Hash Cond: (f.customer_id = r.customer_id)
+                 Join Filter: (r.order_ts > f.first_order_ts)
+                 Rows Removed by Join Filter: 2247
+                 Buffers: shared hit=78
+                 ->  CTE Scan on first_orders f  (cost=0.00..51.96 rows=2598 width=16) (actual time=0.523..0.804 rows=2247 loops=1)
+                       Buffers: shared hit=39
+                 ->  Hash  (cost=90.84..90.84 rows=3009 width=16) (actual time=0.429..0.429 rows=3009 loops=1)
+                       Buckets: 4096  Batches: 1  Memory Usage: 174kB
+                       Buffers: shared hit=39
+                       ->  Seq Scan on orders r  (cost=0.00..90.84 rows=3009 width=16) (actual time=0.002..0.297 rows=3009 loops=1)
+                             Filter: (order_status = ANY ('{paid,shipped,delivered}'::text[]))
+                             Rows Removed by Filter: 761
+                             Buffers: shared hit=39
+   ->  CTE Scan on customer_repurchase  (cost=0.00..5.20 rows=260 width=16) (actual time=1.786..2.097 rows=2247 loops=1)
+         Buffers: shared hit=78
+ Planning:
+   Buffers: shared hit=257
+ Planning Time: 0.436 ms
+ Execution Time: 2.418 ms
+(36 rows)
+

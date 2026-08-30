@@ -1,0 +1,29 @@
+                                                                         QUERY PLAN                                                                         
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=21834.91..21834.93 rows=1 width=48) (actual time=2.418..2.419 rows=1 loops=1)
+   Buffers: shared hit=4756
+   CTE first_orders
+     ->  HashAggregate  (cost=105.88..131.86 rows=2598 width=16) (actual time=0.569..0.677 rows=2247 loops=1)
+           Group Key: orders.customer_id
+           Batches: 1  Memory Usage: 369kB
+           Buffers: shared hit=39
+           ->  Seq Scan on orders  (cost=0.00..90.84 rows=3009 width=16) (actual time=0.004..0.307 rows=3009 loops=1)
+                 Filter: (order_status = ANY ('{paid,shipped,delivered}'::text[]))
+                 Rows Removed by Filter: 761
+                 Buffers: shared hit=39
+   CTE customer_repurchase
+     ->  CTE Scan on first_orders f  (cost=0.00..21638.09 rows=2598 width=9) (actual time=0.575..2.167 rows=2247 loops=1)
+           Buffers: shared hit=4756
+           SubPlan 2
+             ->  Index Scan using idx_orders_customer_ts on orders r  (cost=0.28..8.31 rows=1 width=0) (actual time=0.000..0.000 rows=0 loops=2247)
+                   Index Cond: ((customer_id = f.customer_id) AND (order_ts > f.first_order_ts) AND (order_ts <= (f.first_order_ts + '30 days'::interval)))
+                   Filter: (order_status = ANY ('{paid,shipped,delivered}'::text[]))
+                   Buffers: shared hit=4717
+   ->  CTE Scan on customer_repurchase  (cost=0.00..51.96 rows=2598 width=1) (actual time=0.575..2.344 rows=2247 loops=1)
+         Buffers: shared hit=4756
+ Planning:
+   Buffers: shared hit=233
+ Planning Time: 0.373 ms
+ Execution Time: 2.482 ms
+(25 rows)
+

@@ -1,0 +1,12 @@
+                                                            QUERY PLAN                                                            
+----------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=60.94..60.96 rows=1 width=48) (actual time=0.333..0.334 rows=1 loops=1)
+   Buffers: shared hit=16
+   ->  Seq Scan on mv_customer_first_purchase  (cost=0.00..38.47 rows=2247 width=16) (actual time=0.003..0.080 rows=2247 loops=1)
+         Buffers: shared hit=16
+ Planning:
+   Buffers: shared hit=46
+ Planning Time: 0.112 ms
+ Execution Time: 0.354 ms
+(8 rows)
+

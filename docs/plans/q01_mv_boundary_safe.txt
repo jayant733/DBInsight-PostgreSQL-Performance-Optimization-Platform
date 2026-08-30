@@ -1,0 +1,33 @@
+                                                                                QUERY PLAN                                                                                
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=205.93..205.94 rows=1 width=32) (actual time=0.108..0.110 rows=1 loops=1)
+   Buffers: shared hit=28
+   CTE p
+     ->  Result  (cost=0.00..0.01 rows=1 width=8) (actual time=0.006..0.006 rows=1 loops=1)
+   ->  Append  (cost=0.00..203.55 rows=947 width=7) (actual time=0.014..0.095 rows=70 loops=1)
+         Buffers: shared hit=28
+         ->  Nested Loop  (cost=0.00..4.02 rows=40 width=32) (actual time=0.014..0.042 rows=48 loops=1)
+               Join Filter: (m.day > date_trunc('day'::text, p.cutoff))
+               Rows Removed by Join Filter: 90
+               Buffers: shared hit=1
+               ->  CTE Scan on p  (cost=0.00..0.02 rows=1 width=8) (actual time=0.008..0.008 rows=1 loops=1)
+               ->  Seq Scan on mv_daily_gmv m  (cost=0.00..2.20 rows=120 width=40) (actual time=0.004..0.010 rows=138 loops=1)
+                     Buffers: shared hit=1
+         ->  Nested Loop  (cost=0.57..194.79 rows=907 width=6) (actual time=0.014..0.049 rows=22 loops=1)
+               Buffers: shared hit=27
+               ->  Nested Loop  (cost=0.28..18.32 rows=334 width=8) (actual time=0.008..0.009 rows=8 loops=1)
+                     Buffers: shared hit=3
+                     ->  CTE Scan on p p_1  (cost=0.00..0.02 rows=1 width=8) (actual time=0.000..0.000 rows=1 loops=1)
+                     ->  Index Only Scan using idx_orders_revenue_ts_order_id on orders o  (cost=0.28..14.96 rows=334 width=16) (actual time=0.007..0.007 rows=8 loops=1)
+                           Index Cond: ((order_ts >= p_1.cutoff) AND (order_ts < (date_trunc('day'::text, p_1.cutoff) + '1 day'::interval)))
+                           Heap Fetches: 0
+                           Buffers: shared hit=3
+               ->  Index Scan using idx_order_items_order on order_items oi  (cost=0.29..0.50 rows=3 width=14) (actual time=0.004..0.005 rows=3 loops=8)
+                     Index Cond: (order_id = o.order_id)
+                     Buffers: shared hit=24
+ Planning:
+   Buffers: shared hit=488
+ Planning Time: 1.101 ms
+ Execution Time: 0.155 ms
+(29 rows)
+

@@ -1,0 +1,50 @@
+BEGIN
+psql:queries/q04/baseline_plan.sql:4: NOTICE:  index "idx_orders_q4_valid_order_id" does not exist, skipping
+DROP INDEX
+ANALYZE
+                                                                         QUERY PLAN                                                                          
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=512.79..514.29 rows=600 width=59) (actual time=2.761..2.763 rows=20 loops=1)
+   Sort Key: (rank() OVER (?)), product_revenue.product_id
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=148
+   ->  WindowAgg  (cost=474.62..485.10 rows=600 width=59) (actual time=2.753..2.758 rows=20 loops=1)
+         Run Condition: (rank() OVER (?) <= 20)
+         Buffers: shared hit=148
+         ->  Sort  (cost=474.60..476.10 rows=600 width=51) (actual time=2.751..2.752 rows=21 loops=1)
+               Sort Key: product_revenue.revenue DESC
+               Sort Method: quicksort  Memory: 52kB
+               Buffers: shared hit=148
+               ->  Subquery Scan on product_revenue  (cost=439.42..446.92 rows=600 width=51) (actual time=2.616..2.685 rows=584 loops=1)
+                     Buffers: shared hit=145
+                     ->  HashAggregate  (cost=439.42..446.92 rows=600 width=51) (actual time=2.616..2.663 rows=584 loops=1)
+                           Group Key: p.product_id
+                           Batches: 1  Memory Usage: 297kB
+                           Buffers: shared hit=145
+                           ->  Hash Join  (cost=148.95..398.62 rows=8159 width=25) (actual time=0.438..2.050 rows=8162 loops=1)
+                                 Hash Cond: (oi.product_id = p.product_id)
+                                 Buffers: shared hit=145
+                                 ->  Hash Join  (cost=128.45..356.55 rows=8159 width=14) (actual time=0.381..1.463 rows=8162 loops=1)
+                                       Hash Cond: (oi.order_id = o.order_id)
+                                       Buffers: shared hit=138
+                                       ->  Seq Scan on order_items oi  (cost=0.00..201.23 rows=10223 width=22) (actual time=0.001..0.345 rows=10223 loops=1)
+                                             Buffers: shared hit=99
+                                       ->  Hash  (cost=90.84..90.84 rows=3009 width=8) (actual time=0.376..0.376 rows=3009 loops=1)
+                                             Buckets: 4096  Batches: 1  Memory Usage: 150kB
+                                             Buffers: shared hit=39
+                                             ->  Seq Scan on orders o  (cost=0.00..90.84 rows=3009 width=8) (actual time=0.002..0.251 rows=3009 loops=1)
+                                                   Filter: (order_status = ANY ('{paid,shipped,delivered}'::text[]))
+                                                   Rows Removed by Filter: 761
+                                                   Buffers: shared hit=39
+                                 ->  Hash  (cost=13.00..13.00 rows=600 width=19) (actual time=0.055..0.055 rows=600 loops=1)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 39kB
+                                       Buffers: shared hit=7
+                                       ->  Seq Scan on products p  (cost=0.00..13.00 rows=600 width=19) (actual time=0.003..0.030 rows=600 loops=1)
+                                             Buffers: shared hit=7
+ Planning:
+   Buffers: shared hit=230
+ Planning Time: 0.439 ms
+ Execution Time: 2.798 ms
+(41 rows)
+
+ROLLBACK

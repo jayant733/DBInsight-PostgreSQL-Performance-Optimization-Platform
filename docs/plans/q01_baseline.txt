@@ -1,0 +1,22 @@
+                                                              QUERY PLAN                                                               
+---------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=364.72..364.73 rows=1 width=32) (actual time=2.746..2.748 rows=1 loops=1)
+   Buffers: shared hit=138
+   ->  Hash Join  (cost=130.46..358.56 rows=2462 width=6) (actual time=0.929..2.545 rows=2567 loops=1)
+         Hash Cond: (oi.order_id = o.order_id)
+         Buffers: shared hit=138
+         ->  Seq Scan on order_items oi  (cost=0.00..201.23 rows=10223 width=14) (actual time=0.003..0.618 rows=10223 loops=1)
+               Buffers: shared hit=99
+         ->  Hash  (cost=119.11..119.11 rows=908 width=8) (actual time=0.917..0.918 rows=949 loops=1)
+               Buckets: 1024  Batches: 1  Memory Usage: 46kB
+               Buffers: shared hit=39
+               ->  Seq Scan on orders o  (cost=0.00..119.11 rows=908 width=8) (actual time=0.007..0.825 rows=949 loops=1)
+                     Filter: ((order_status = ANY ('{paid,shipped,delivered}'::text[])) AND (order_ts >= (now() - '1 mon'::interval)))
+                     Rows Removed by Filter: 2821
+                     Buffers: shared hit=39
+ Planning:
+   Buffers: shared hit=356
+ Planning Time: 0.927 ms
+ Execution Time: 2.786 ms
+(18 rows)
+

@@ -1,0 +1,22 @@
+                                                                             QUERY PLAN                                                                              
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=281.78..281.79 rows=1 width=32) (actual time=1.287..1.289 rows=1 loops=1)
+   Buffers: shared hit=106
+   ->  Hash Join  (cost=47.52..275.62 rows=2462 width=6) (actual time=0.113..1.172 rows=2567 loops=1)
+         Hash Cond: (oi.order_id = o.order_id)
+         Buffers: shared hit=106
+         ->  Seq Scan on order_items oi  (cost=0.00..201.23 rows=10223 width=14) (actual time=0.002..0.456 rows=10223 loops=1)
+               Buffers: shared hit=99
+         ->  Hash  (cost=36.17..36.17 rows=908 width=8) (actual time=0.103..0.103 rows=949 loops=1)
+               Buckets: 1024  Batches: 1  Memory Usage: 46kB
+               Buffers: shared hit=7
+               ->  Index Only Scan using idx_orders_revenue_ts_order_id on orders o  (cost=0.28..36.17 rows=908 width=8) (actual time=0.005..0.056 rows=949 loops=1)
+                     Index Cond: (order_ts >= (now() - '1 mon'::interval))
+                     Heap Fetches: 0
+                     Buffers: shared hit=7
+ Planning:
+   Buffers: shared hit=384
+ Planning Time: 0.685 ms
+ Execution Time: 1.333 ms
+(18 rows)
+

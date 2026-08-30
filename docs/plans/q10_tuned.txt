@@ -1,0 +1,83 @@
+                                                                 QUERY PLAN                                                                  
+---------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1942.77..1945.27 rows=1000 width=112) (actual time=6.697..6.701 rows=30 loops=1)
+   Sort Key: t.revenue_rank
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=181
+   CTE order_totals
+     ->  HashAggregate  (cost=397.34..434.96 rows=3009 width=56) (actual time=2.463..2.729 rows=3009 loops=1)
+           Group Key: o.order_id
+           Batches: 1  Memory Usage: 1393kB
+           Buffers: shared hit=138
+           ->  Hash Join  (cost=128.45..356.55 rows=8159 width=30) (actual time=0.451..1.659 rows=8162 loops=1)
+                 Hash Cond: (oi.order_id = o.order_id)
+                 Buffers: shared hit=138
+                 ->  Seq Scan on order_items oi  (cost=0.00..201.23 rows=10223 width=14) (actual time=0.001..0.368 rows=10223 loops=1)
+                       Buffers: shared hit=99
+                 ->  Hash  (cost=90.84..90.84 rows=3009 width=24) (actual time=0.444..0.444 rows=3009 loops=1)
+                       Buckets: 4096  Batches: 1  Memory Usage: 197kB
+                       Buffers: shared hit=39
+                       ->  Seq Scan on orders o  (cost=0.00..90.84 rows=3009 width=24) (actual time=0.003..0.304 rows=3009 loops=1)
+                             Filter: (order_status = ANY ('{paid,shipped,delivered}'::text[]))
+                             Rows Removed by Filter: 761
+                             Buffers: shared hit=39
+   CTE customer_lifetime
+     ->  HashAggregate  (cost=190.63..228.13 rows=3000 width=40) (actual time=3.981..4.197 rows=3000 loops=1)
+           Group Key: c.customer_id
+           Batches: 1  Memory Usage: 1393kB
+           Buffers: shared hit=178
+           ->  Hash Right Join  (cost=107.50..175.59 rows=3009 width=40) (actual time=2.700..3.578 rows=3762 loops=1)
+                 Hash Cond: (ot.customer_id = c.customer_id)
+                 Buffers: shared hit=178
+                 ->  CTE Scan on order_totals ot  (cost=0.00..60.18 rows=3009 width=40) (actual time=2.463..3.030 rows=3009 loops=1)
+                       Buffers: shared hit=138
+                 ->  Hash  (cost=70.00..70.00 rows=3000 width=8) (actual time=0.232..0.232 rows=3000 loops=1)
+                       Buckets: 4096  Batches: 1  Memory Usage: 150kB
+                       Buffers: shared hit=40
+                       ->  Seq Scan on customers c  (cost=0.00..70.00 rows=3000 width=8) (actual time=0.002..0.127 rows=3000 loops=1)
+                             Buffers: shared hit=40
+   CTE ranked
+     ->  WindowAgg  (cost=330.73..330.76 rows=3000 width=56) (actual time=5.489..5.638 rows=3000 loops=1)
+           Buffers: shared hit=181
+           ->  WindowAgg  (cost=233.28..293.26 rows=3000 width=48) (actual time=5.009..5.294 rows=3000 loops=1)
+                 Buffers: shared hit=181
+                 ->  Sort  (cost=233.26..240.76 rows=3000 width=40) (actual time=5.008..5.068 rows=3000 loops=1)
+                       Sort Key: customer_lifetime.lifetime_revenue DESC, customer_lifetime.customer_id
+                       Sort Method: quicksort  Memory: 190kB
+                       Buffers: shared hit=181
+                       ->  CTE Scan on customer_lifetime  (cost=0.00..60.00 rows=3000 width=40) (actual time=3.981..4.461 rows=3000 loops=1)
+                             Buffers: shared hit=178
+   CTE top_customers
+     ->  CTE Scan on ranked  (cost=0.00..97.50 rows=1000 width=48) (actual time=5.490..6.136 rows=30 loops=1)
+           Filter: ((revenue_rank)::numeric <= ceil(((customer_count)::numeric * 0.01)))
+           Rows Removed by Filter: 2970
+           Buffers: shared hit=181
+   CTE recent_by_customer
+     ->  GroupAggregate  (cost=303.85..725.09 rows=200 width=40) (actual time=1.080..1.181 rows=30 loops=1)
+           Group Key: t_1.customer_id
+           ->  Merge Left Join  (cost=303.85..534.53 rows=15045 width=48) (actual time=1.069..1.113 rows=592 loops=1)
+                 Merge Cond: (t_1.customer_id = ot_1.customer_id)
+                 ->  Sort  (cost=69.83..72.33 rows=1000 width=8) (actual time=0.653..0.654 rows=30 loops=1)
+                       Sort Key: t_1.customer_id
+                       Sort Method: quicksort  Memory: 25kB
+                       ->  CTE Scan on top_customers t_1  (cost=0.00..20.00 rows=1000 width=8) (actual time=0.000..0.649 rows=30 loops=1)
+                 ->  Sort  (cost=234.03..241.55 rows=3009 width=48) (actual time=0.414..0.427 rows=593 loops=1)
+                       Sort Key: ot_1.customer_id
+                       Sort Method: quicksort  Memory: 214kB
+                       ->  CTE Scan on order_totals ot_1  (cost=0.00..60.18 rows=3009 width=48) (actual time=0.000..0.132 rows=3009 loops=1)
+   ->  WindowAgg  (cost=76.43..76.50 rows=1000 width=112) (actual time=6.691..6.693 rows=30 loops=1)
+         Buffers: shared hit=181
+         ->  Hash Join  (cost=6.50..64.00 rows=1000 width=80) (actual time=6.683..6.686 rows=30 loops=1)
+               Hash Cond: (t.customer_id = r.customer_id)
+               Buffers: shared hit=181
+               ->  CTE Scan on top_customers t  (cost=0.00..20.00 rows=1000 width=48) (actual time=5.491..5.492 rows=30 loops=1)
+                     Buffers: shared hit=181
+               ->  Hash  (cost=4.00..4.00 rows=200 width=40) (actual time=1.187..1.187 rows=30 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 10kB
+                     ->  CTE Scan on recent_by_customer r  (cost=0.00..4.00 rows=200 width=40) (actual time=1.080..1.185 rows=30 loops=1)
+ Planning:
+   Buffers: shared hit=418
+ Planning Time: 0.696 ms
+ Execution Time: 6.789 ms
+(79 rows)
+

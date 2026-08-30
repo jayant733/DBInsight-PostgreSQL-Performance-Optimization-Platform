@@ -1,0 +1,89 @@
+                                                                                           QUERY PLAN                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1596.83..1599.33 rows=1000 width=112) (actual time=6.557..6.560 rows=30 loops=1)
+   Sort Key: t.revenue_rank
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=300
+   CTE customer_lifetime
+     ->  HashAggregate  (cost=526.29..563.79 rows=3000 width=40) (actual time=3.129..3.360 rows=3000 loops=1)
+           Group Key: c.customer_id
+           Batches: 1  Memory Usage: 1393kB
+           Buffers: shared hit=178
+           ->  Hash Right Join  (cost=235.95..485.50 rows=8159 width=14) (actual time=0.710..2.387 rows=8915 loops=1)
+                 Hash Cond: (o.customer_id = c.customer_id)
+                 Buffers: shared hit=178
+                 ->  Hash Right Join  (cost=128.45..356.55 rows=8159 width=14) (actual time=0.402..1.503 rows=8162 loops=1)
+                       Hash Cond: (oi.order_id = o.order_id)
+                       Buffers: shared hit=138
+                       ->  Seq Scan on order_items oi  (cost=0.00..201.23 rows=10223 width=14) (actual time=0.001..0.338 rows=10223 loops=1)
+                             Buffers: shared hit=99
+                       ->  Hash  (cost=90.84..90.84 rows=3009 width=16) (actual time=0.394..0.395 rows=3009 loops=1)
+                             Buckets: 4096  Batches: 1  Memory Usage: 174kB
+                             Buffers: shared hit=39
+                             ->  Seq Scan on orders o  (cost=0.00..90.84 rows=3009 width=16) (actual time=0.003..0.269 rows=3009 loops=1)
+                                   Filter: (order_status = ANY ('{paid,shipped,delivered}'::text[]))
+                                   Rows Removed by Filter: 761
+                                   Buffers: shared hit=39
+                 ->  Hash  (cost=70.00..70.00 rows=3000 width=8) (actual time=0.303..0.303 rows=3000 loops=1)
+                       Buckets: 4096  Batches: 1  Memory Usage: 150kB
+                       Buffers: shared hit=40
+                       ->  Seq Scan on customers c  (cost=0.00..70.00 rows=3000 width=8) (actual time=0.002..0.162 rows=3000 loops=1)
+                             Buffers: shared hit=40
+   CTE ranked
+     ->  WindowAgg  (cost=330.73..330.76 rows=3000 width=56) (actual time=4.768..4.926 rows=3000 loops=1)
+           Buffers: shared hit=181
+           ->  WindowAgg  (cost=233.28..293.26 rows=3000 width=48) (actual time=4.210..4.541 rows=3000 loops=1)
+                 Buffers: shared hit=181
+                 ->  Sort  (cost=233.26..240.76 rows=3000 width=40) (actual time=4.209..4.279 rows=3000 loops=1)
+                       Sort Key: customer_lifetime.lifetime_revenue DESC, customer_lifetime.customer_id
+                       Sort Method: quicksort  Memory: 190kB
+                       Buffers: shared hit=181
+                       ->  CTE Scan on customer_lifetime  (cost=0.00..60.00 rows=3000 width=40) (actual time=3.130..3.615 rows=3000 loops=1)
+                             Buffers: shared hit=178
+   CTE top_customers
+     ->  CTE Scan on ranked  (cost=0.00..97.50 rows=1000 width=48) (actual time=4.770..5.451 rows=30 loops=1)
+           Filter: ((revenue_rank)::numeric <= ceil(((customer_count)::numeric * 0.01)))
+           Rows Removed by Filter: 2970
+           Buffers: shared hit=181
+   CTE recent_by_customer
+     ->  HashAggregate  (cost=475.95..478.45 rows=200 width=40) (actual time=1.752..1.755 rows=30 loops=1)
+           Group Key: t_1.customer_id
+           Batches: 1  Memory Usage: 48kB
+           Buffers: shared hit=116
+           ->  Hash Right Join  (cost=195.70..462.39 rows=2712 width=14) (actual time=0.986..1.649 rows=1666 loops=1)
+                 Hash Cond: (oi_1.order_id = o_1.order_id)
+                 Buffers: shared hit=116
+                 ->  Seq Scan on order_items oi_1  (cost=0.00..201.23 rows=10223 width=14) (actual time=0.002..0.236 rows=10223 loops=1)
+                       Buffers: shared hit=99
+                 ->  Hash  (cost=183.20..183.20 rows=1000 width=16) (actual time=0.979..0.980 rows=583 loops=1)
+                       Buckets: 1024  Batches: 1  Memory Usage: 36kB
+                       Buffers: shared hit=17
+                       ->  Hash Left Join  (cost=129.91..183.20 rows=1000 width=16) (actual time=0.235..0.950 rows=583 loops=1)
+                             Hash Cond: (t_1.customer_id = o_1.customer_id)
+                             Buffers: shared hit=17
+                             ->  CTE Scan on top_customers t_1  (cost=0.00..20.00 rows=1000 width=8) (actual time=0.000..0.685 rows=30 loops=1)
+                             ->  Hash  (cost=108.21..108.21 rows=1736 width=16) (actual time=0.232..0.232 rows=1797 loops=1)
+                                   Buckets: 2048  Batches: 1  Memory Usage: 101kB
+                                   Buffers: shared hit=17
+                                   ->  Index Only Scan using idx_orders_q6_valid_customer_ts on orders o_1  (cost=0.28..108.21 rows=1736 width=16) (actual time=0.010..0.143 rows=1797 loops=1)
+                                         Index Cond: (order_ts >= (now() - '60 days'::interval))
+                                         Heap Fetches: 0
+                                         Buffers: shared hit=17
+   ->  WindowAgg  (cost=76.43..76.50 rows=1000 width=112) (actual time=6.545..6.547 rows=30 loops=1)
+         Buffers: shared hit=297
+         ->  Hash Join  (cost=6.50..64.00 rows=1000 width=80) (actual time=6.536..6.539 rows=30 loops=1)
+               Hash Cond: (t.customer_id = r.customer_id)
+               Buffers: shared hit=297
+               ->  CTE Scan on top_customers t  (cost=0.00..20.00 rows=1000 width=48) (actual time=4.770..4.771 rows=30 loops=1)
+                     Buffers: shared hit=181
+               ->  Hash  (cost=4.00..4.00 rows=200 width=40) (actual time=1.760..1.760 rows=30 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 10kB
+                     Buffers: shared hit=116
+                     ->  CTE Scan on recent_by_customer r  (cost=0.00..4.00 rows=200 width=40) (actual time=1.753..1.758 rows=30 loops=1)
+                           Buffers: shared hit=116
+ Planning:
+   Buffers: shared hit=467
+ Planning Time: 0.909 ms
+ Execution Time: 6.652 ms
+(85 rows)
+

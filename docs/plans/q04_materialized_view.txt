@@ -1,0 +1,29 @@
+                                                                   QUERY PLAN                                                                    
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=95.61..97.07 rows=584 width=59) (actual time=0.221..0.232 rows=20 loops=1)
+   Sort Key: (rank() OVER (?)), m.product_id
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=17
+   ->  WindowAgg  (cost=58.58..68.78 rows=584 width=59) (actual time=0.207..0.214 rows=20 loops=1)
+         Run Condition: (rank() OVER (?) <= 20)
+         Buffers: shared hit=14
+         ->  Sort  (cost=58.56..60.02 rows=584 width=51) (actual time=0.203..0.204 rows=21 loops=1)
+               Sort Key: m.revenue DESC
+               Sort Method: quicksort  Memory: 52kB
+               Buffers: shared hit=14
+               ->  Hash Join  (cost=17.14..31.73 rows=584 width=51) (actual time=0.052..0.127 rows=584 loops=1)
+                     Hash Cond: (p.product_id = m.product_id)
+                     Buffers: shared hit=11
+                     ->  Seq Scan on products p  (cost=0.00..13.00 rows=600 width=19) (actual time=0.003..0.027 rows=600 loops=1)
+                           Buffers: shared hit=7
+                     ->  Hash  (cost=9.84..9.84 rows=584 width=40) (actual time=0.045..0.046 rows=584 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 35kB
+                           Buffers: shared hit=4
+                           ->  Seq Scan on mv_product_revenue m  (cost=0.00..9.84 rows=584 width=40) (actual time=0.003..0.022 rows=584 loops=1)
+                                 Buffers: shared hit=4
+ Planning:
+   Buffers: shared hit=190
+ Planning Time: 0.313 ms
+ Execution Time: 0.273 ms
+(25 rows)
+

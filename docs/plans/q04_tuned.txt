@@ -1,0 +1,45 @@
+                                                                                 QUERY PLAN                                                                                  
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=502.11..503.59 rows=592 width=59) (actual time=2.119..2.121 rows=20 loops=1)
+   Sort Key: (rank() OVER (?)), ps.product_id
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=123
+   CTE product_sales
+     ->  HashAggregate  (cost=395.92..403.32 rows=592 width=40) (actual time=1.842..1.884 rows=584 loops=1)
+           Group Key: oi.product_id
+           Batches: 1  Memory Usage: 297kB
+           Buffers: shared hit=110
+           ->  Hash Join  (cost=127.03..355.13 rows=8159 width=14) (actual time=0.230..1.264 rows=8162 loops=1)
+                 Hash Cond: (oi.order_id = o.order_id)
+                 Buffers: shared hit=110
+                 ->  Seq Scan on order_items oi  (cost=0.00..201.23 rows=10223 width=22) (actual time=0.002..0.329 rows=10223 loops=1)
+                       Buffers: shared hit=99
+                 ->  Hash  (cost=89.42..89.42 rows=3009 width=8) (actual time=0.222..0.222 rows=3009 loops=1)
+                       Buckets: 4096  Batches: 1  Memory Usage: 150kB
+                       Buffers: shared hit=11
+                       ->  Index Only Scan using idx_orders_q4_valid_order_id on orders o  (cost=0.28..89.42 rows=3009 width=8) (actual time=0.005..0.100 rows=3009 loops=1)
+                             Heap Fetches: 0
+                             Buffers: shared hit=11
+   ->  WindowAgg  (cost=61.18..71.53 rows=592 width=59) (actual time=2.107..2.112 rows=20 loops=1)
+         Run Condition: (rank() OVER (?) <= 20)
+         Buffers: shared hit=120
+         ->  Sort  (cost=61.17..62.65 rows=592 width=51) (actual time=2.103..2.104 rows=21 loops=1)
+               Sort Key: ps.revenue DESC
+               Sort Method: quicksort  Memory: 52kB
+               Buffers: shared hit=120
+               ->  Hash Join  (cost=20.50..33.91 rows=592 width=51) (actual time=1.906..2.036 rows=584 loops=1)
+                     Hash Cond: (ps.product_id = p.product_id)
+                     Buffers: shared hit=117
+                     ->  CTE Scan on product_sales ps  (cost=0.00..11.84 rows=592 width=40) (actual time=1.843..1.930 rows=584 loops=1)
+                           Buffers: shared hit=110
+                     ->  Hash  (cost=13.00..13.00 rows=600 width=19) (actual time=0.057..0.058 rows=600 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 41kB
+                           Buffers: shared hit=7
+                           ->  Seq Scan on products p  (cost=0.00..13.00 rows=600 width=19) (actual time=0.003..0.031 rows=600 loops=1)
+                                 Buffers: shared hit=7
+ Planning:
+   Buffers: shared hit=396
+ Planning Time: 0.589 ms
+ Execution Time: 2.188 ms
+(41 rows)
+
