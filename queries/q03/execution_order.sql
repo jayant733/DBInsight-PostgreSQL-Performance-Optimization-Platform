@@ -1,0 +1,7 @@
+-- Q3 Execution Sequence
+-- 01 -> 02 -> 03 -> 04 -> 05 -> 06 -> 07 -> 08 -> 08b -> 09 -> 10 -> 11 -> 12
+-- 02 temporarily drops Q1 partial index inside a transaction and ROLLBACKs at the end.
+-- 03 onwards reuses the recent-period partial index created in Q1.
+-- 05/06/07: Hash/Nested Loop/Merge Join comparisons for tuned query
+-- 08: Bitmap Heap Scan comparison on date index. Run 08b in the same editor after capture
+-- 09: Create/refresh Daily Category Sales MV
