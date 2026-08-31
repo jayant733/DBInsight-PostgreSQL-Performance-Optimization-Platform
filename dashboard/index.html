@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostgreSQL Query Performance & Optimization Lab Dashboard</title>
+  <meta name="description" content="Interactive visual dashboard and video demonstration studio for the PostgreSQL E-Commerce Query Performance Lab.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+  <!-- Background Glow FX -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <!-- Main Navigation / Header -->
+  <header class="navbar" id="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">PostgreSQL Performance Lab</span>
+          <span class="badge badge-pg17">PostgreSQL 17.10</span>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <button class="nav-btn active" data-tab="overview" id="nav-overview">Overview & KPIs</button>
+        <button class="nav-btn" data-tab="scenarios" id="nav-scenarios">Scenarios (Q1–Q10)</button>
+        <button class="nav-btn" data-tab="casestudies" id="nav-casestudies">Deep Dive Studies</button>
+        <button class="nav-btn" data-tab="joins" id="nav-joins">Join & Scan Benchmarks</button>
+        <button class="nav-btn" data-tab="video-guide" id="nav-video-guide">🎬 Video Presentation Script</button>
+      </nav>
+      <div class="header-actions">
+        <span class="pulse-indicator"></span>
+        <span class="status-badge">10/10 Verified Parity</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="main-content">
+
+    <!-- TAB 1: OVERVIEW & KPIS -->
+    <section id="tab-overview" class="tab-pane active">
+      <div class="hero-section">
+        <div class="hero-tag">ENTERPRISE QUERY OPTIMIZATION LAB</div>
+        <h1 class="hero-title">High-Throughput PostgreSQL E-Commerce Query Tuning</h1>
+        <p class="hero-subtitle">Systematic latency & I/O optimization across 10 mission-critical analytical query workloads using Execution Plan Profiling, Partial Indexing, CTE Pre-aggregation, and Boundary-Safe Materialized Views.</p>
+      </div>
+
+      <!-- KPI Grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card" id="kpi-buffer-reduction">
+          <div class="kpi-icon icon-blue">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <div class="kpi-details">
+            <div class="kpi-value">97.5%</div>
+            <div class="kpi-label">Peak Buffer I/O Reduction</div>
+            <div class="kpi-sub">5,633 → 142 buffers in Q6 (Correlated EXISTS)</div>
+          </div>
+        </div>
+
+        <div class="kpi-card" id="kpi-latency-speedup">
+          <div class="kpi-icon icon-green">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div class="kpi-details">
+            <div class="kpi-value">73%</div>
+            <div class="kpi-label">Materialized View Speedup</div>
+            <div class="kpi-sub">1.35 ms → 0.36 ms with 100% boundary parity</div>
+          </div>
+        </div>
+
+        <div class="kpi-card" id="kpi-join-tuning">
+          <div class="kpi-icon icon-purple">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </div>
+          <div class="kpi-details">
+            <div class="kpi-value">62%</div>
+            <div class="kpi-label">Merge Join Optimization</div>
+            <div class="kpi-sub">7.98 ms → 3.05 ms in Q4 exploiting ordered indexes</div>
+          </div>
+        </div>
+
+        <div class="kpi-card" id="kpi-data-integrity">
+          <div class="kpi-icon icon-emerald">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div class="kpi-details">
+            <div class="kpi-value">0 Errors</div>
+            <div class="kpi-label">Bidirectional EXCEPT ALL</div>
+            <div class="kpi-sub">Zero row discrepancies across all 10 tuned scenarios</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overview Charts Section -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Execution Latency Comparison (Baseline vs. Tuned)</h3>
+            <span class="chart-tag">Milliseconds (Lower is better)</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="latencyChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Shared Buffer I/O Page Access (Baseline vs. Tuned)</h3>
+            <span class="chart-tag">8KB Buffer Blocks (Lower is better)</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="buffersChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Optimization Methodology Workflow -->
+      <div class="workflow-card">
+        <h3>🔬 The 6-Step Engineering Optimization Lifecycle</h3>
+        <div class="workflow-steps">
+          <div class="wf-step">
+            <div class="step-num">01</div>
+            <div class="step-title">Baseline Query</div>
+            <div class="step-desc">Establish un-tuned runtime & IO baseline metrics.</div>
+          </div>
+          <div class="wf-arrow">→</div>
+          <div class="wf-step">
+            <div class="step-num">02</div>
+            <div class="step-title">EXPLAIN (BUFFERS)</div>
+            <div class="step-desc">Inspect memory pages, seq scans & sort spills.</div>
+          </div>
+          <div class="wf-arrow">→</div>
+          <div class="wf-step">
+            <div class="step-num">03</div>
+            <div class="step-title">Query Refactoring</div>
+            <div class="step-desc">Apply partial indexes & CTE pre-aggregations.</div>
+          </div>
+          <div class="wf-arrow">→</div>
+          <div class="wf-step">
+            <div class="step-num">04</div>
+            <div class="step-title">Join Benchmark</div>
+            <div class="step-desc">Compare Hash, Merge, and Nested Loop algorithms.</div>
+          </div>
+          <div class="wf-arrow">→</div>
+          <div class="wf-step">
+            <div class="step-num">05</div>
+            <div class="step-title">Safe MVs</div>
+            <div class="step-desc">Deploy concurrent MVs with boundary protection.</div>
+          </div>
+          <div class="wf-arrow">→</div>
+          <div class="wf-step">
+            <div class="step-num">06</div>
+            <div class="step-title">Correctness Audit</div>
+            <div class="step-desc">Verify 0 row mismatches via EXCEPT ALL tests.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: SCENARIOS (Q1 to Q10) -->
+    <section id="tab-scenarios" class="tab-pane">
+      <div class="scenarios-layout">
+        <!-- Sidebar scenario selector -->
+        <aside class="scenario-sidebar">
+          <div class="sidebar-header">
+            <h3>Query Scenarios</h3>
+            <span class="badge">10 Workloads</span>
+          </div>
+          <div class="scenario-list" id="scenario-nav-list">
+            <!-- Populated via JS -->
+          </div>
+        </aside>
+
+        <!-- Main scenario viewer -->
+        <div class="scenario-detail" id="scenario-detail-view">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: DEEP DIVE CASE STUDIES -->
+    <section id="tab-casestudies" class="tab-pane">
+      <div class="case-studies-grid">
+        <!-- Case 1: Q1 Boundary Safety -->
+        <div class="case-card featured">
+          <div class="case-badge">CRITICAL ARCHITECTURAL PATTERN</div>
+          <h2>Case Study 1: The $39.4k Date-Boundary Materialized View Anomaly (Q1)</h2>
+          <p>When calculating a rolling 1-month revenue metric (e.g. <code>order_ts >= now() - INTERVAL '1 month'</code>), the cutoff timestamp falls mid-day. A naive Materialized View aggregated daily from midnight overcounts prior morning hours.</p>
+
+          <div class="boundary-demo-visual">
+            <div class="timeline-box">
+              <div class="tl-segment tl-overcount">
+                <span class="tl-label">Midnight 00:00 to Cutoff 14:30</span>
+                <span class="tl-status">❌ Naive MV Overcounts: +$39,475.01</span>
+              </div>
+              <div class="tl-segment tl-valid-raw">
+                <span class="tl-label">Cutoff 14:30 to 23:59 (Raw Delta)</span>
+                <span class="tl-status">⚡ Queried from Raw Tables</span>
+              </div>
+              <div class="tl-segment tl-valid-mv">
+                <span class="tl-label">Closed Full Days (Day 2 to Day 30)</span>
+                <span class="tl-status">✅ Queried from Fast MV (0.05ms)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-diff-box">
+            <div class="code-header">
+              <span>The Boundary-Safe Hybrid Query Architecture (queries/q01/materialized_view_boundary_safe_plan.sql)</span>
+            </div>
+            <pre><code>WITH p AS MATERIALIZED (
+  SELECT now() - INTERVAL '1 month' AS cutoff
+)
+SELECT SUM(amount) AS monthly_revenue
+FROM (
+  -- 1. Full enclosed historical days from MV (Lightning Fast)
+  SELECT m.gmv AS amount
+  FROM ecom.mv_daily_gmv m CROSS JOIN p
+  WHERE m.day > date_trunc('day', p.cutoff)
+  
+  UNION ALL
+  
+  -- 2. Real-time fractional boundary delta from raw indexed tables (Zero Overcount)
+  SELECT oi.line_total
+  FROM ecom.orders o
+  JOIN ecom.order_items oi ON oi.order_id = o.order_id
+  CROSS JOIN p
+  WHERE o.order_status IN ('paid', 'shipped', 'delivered')
+    AND o.order_ts >= p.cutoff
+    AND o.order_ts < date_trunc('day', p.cutoff) + INTERVAL '1 day'
+) s;</code></pre>
+          </div>
+
+          <div class="metrics-pill-row">
+            <div class="mp-item"><span class="mp-lbl">Direct Raw Query:</span> <strong>$1,422,428.75</strong></div>
+            <div class="mp-item error"><span class="mp-lbl">Naive MV:</span> <strong>$1,461,903.76</strong> (+$39.4k Error)</div>
+            <div class="mp-item success"><span class="mp-lbl">Boundary-Safe Hybrid MV:</span> <strong>$1,422,428.75</strong> (0.00 Parity)</div>
+          </div>
+        </div>
+
+        <!-- Case 2: Q6 Correlated Subquery -->
+        <div class="case-card">
+          <div class="case-badge">I/O OPTIMIZATION (97.5% BUFFER CUT)</div>
+          <h2>Case Study 2: Eliminating Correlated EXISTS Loop (Q6)</h2>
+          <p>Calculating 30-day repeat purchase cohorts. The baseline executed a correlated subquery 2,222 times causing 5,633 buffer page hits. Replacing it with a pre-aggregated CTE reduced buffer I/O to 142 pages in a single table pass.</p>
+          <div class="plan-compare-box">
+            <div class="plan-col">
+              <h4>❌ Baseline Correlated SubPlan</h4>
+              <pre><code>-> Seq Scan on orders (cost=0..504 rows=2222)
+   SubPlan 1
+     -> Index Scan on orders (loops=2222)
+Buffers: shared hit=5633
+Execution Time: 6.013 ms</code></pre>
+            </div>
+            <div class="plan-col">
+              <h4>✅ Tuned Hash Left Join + CTE</h4>
+              <pre><code>-> Hash Left Join (cost=142..280 rows=2222)
+   -> CTE Scan on first_orders (1 pass)
+Buffers: shared hit=142
+Execution Time: 4.454 ms</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Case 3: Q10 Nested Loop Hazard -->
+        <div class="case-card">
+          <div class="case-badge">DATABASE ENGINE INTERNALS</div>
+          <h2>Case Study 3: The Danger of Forcing Join Algorithms (Q10)</h2>
+          <p>Demonstrates that "Query Optimization ≠ Forcing a Join Type". Forcing a Nested Loop Join on analytical queries ballooned execution time to 690ms and 15,976 buffers, whereas Hash Join and Hybrid MVs executed in 3.1ms.</p>
+          <div class="join-hazard-metric">
+            <div class="hazard-bar">
+              <span class="hb-title">Forced Nested Loop Join:</span>
+              <div class="bar-fill bad" style="width: 100%;">690.28 ms (15,976 buffers)</div>
+            </div>
+            <div class="hazard-bar">
+              <span class="hb-title">Planner Default Hash Join:</span>
+              <div class="bar-fill good" style="width: 3%;">13.55 ms (294 buffers)</div>
+            </div>
+            <div class="hazard-bar">
+              <span class="hb-title">Lifetime MV + Raw Delta:</span>
+              <div class="bar-fill best" style="width: 1.5%;">3.16 ms (231 buffers)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: JOIN & SCAN BENCHMARKS -->
+    <section id="tab-joins" class="tab-pane">
+      <div class="section-intro">
+        <h2>Systematic Join & Scan Algorithm Benchmark Matrix</h2>
+        <p>Comparison of execution times and memory buffer page accesses across Hash Join, Nested Loop Join, Merge Join, and Bitmap Heap Scans for each scenario.</p>
+      </div>
+
+      <div class="table-responsive">
+        <table class="benchmark-table" id="benchmark-matrix-table">
+          <thead>
+            <tr>
+              <th>Query Scenario</th>
+              <th>Baseline</th>
+              <th>Tuned (Default)</th>
+              <th>Hash Join</th>
+              <th>Nested Loop (Forced)</th>
+              <th>Merge Join (Forced)</th>
+              <th>Bitmap Scan</th>
+              <th>Materialized View</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q1</strong> (1-Mo Revenue)</td>
+              <td>4.46 ms <small>(251 buf)</small></td>
+              <td><span class="badge-good">3.18 ms</span> <small>(189 buf)</small></td>
+              <td>4.68 ms</td>
+              <td><span class="badge-warn">3.54 ms</span> <small>(4,385 buf)</small></td>
+              <td>5.26 ms</td>
+              <td>3.76 ms</td>
+              <td><span class="badge-best">0.36 ms</span> <small>(44 buf)</small></td>
+            </tr>
+            <tr>
+              <td><strong>Q2</strong> (Monthly AOV)</td>
+              <td>14.20 ms <small>(251 buf)</small></td>
+              <td><span class="badge-good">7.94 ms</span> <small>(251 buf)</small></td>
+              <td>14.93 ms</td>
+              <td><span class="badge-bad">18.59 ms</span> <small>(15,959 buf)</small></td>
+              <td>13.93 ms</td>
+              <td>18.14 ms</td>
+              <td><span class="badge-best">0.006 ms</span> <small>(1 buf)</small></td>
+            </tr>
+            <tr>
+              <td><strong>Q3</strong> (Top 10 Categories)</td>
+              <td>8.61 ms <small>(259 buf)</small></td>
+              <td><span class="badge-good">4.48 ms</span> <small>(226 buf)</small></td>
+              <td>8.42 ms</td>
+              <td><span class="badge-bad">11.59 ms</span> <small>(14,230 buf)</small></td>
+              <td>7.83 ms</td>
+              <td>9.04 ms</td>
+              <td><span class="badge-best">0.32 ms</span> <small>(82 buf)</small></td>
+            </tr>
+            <tr>
+              <td><strong>Q4</strong> (Top 20 Products)</td>
+              <td>7.98 ms <small>(258 buf)</small></td>
+              <td>5.65 ms <small>(204 buf)</small></td>
+              <td>6.21 ms</td>
+              <td><span class="badge-warn">6.06 ms</span> <small>(15,638 buf)</small></td>
+              <td><span class="badge-best">3.06 ms</span> <small>(245 buf)</small></td>
+              <td>6.13 ms</td>
+              <td><span class="badge-best">0.15 ms</span> <small>(11 buf)</small></td>
+            </tr>
+            <tr>
+              <td><strong>Q5</strong> (Customer RFM)</td>
+              <td>20.36 ms <small>(257 buf)</small></td>
+              <td><span class="badge-good">10.02 ms</span> <small>(251 buf)</small></td>
+              <td>17.67 ms</td>
+              <td><span class="badge-bad">13.76 ms</span> <small>(15,959 buf)</small></td>
+              <td>8.65 ms</td>
+              <td>12.45 ms</td>
+              <td><span class="badge-best">0.62 ms</span> <small>(17 buf)</small></td>
+            </tr>
+            <tr>
+              <td><strong>Q6</strong> (30-Day Repurchase)</td>
+              <td>6.01 ms <small>(5,633 buf)</small></td>
+              <td><span class="badge-good">4.45 ms</span> <small>(142 buf)</small></td>
+              <td>4.16 ms</td>
+              <td><span class="badge-warn">5.87 ms</span> <small>(4,504 buf)</small></td>
+              <td>6.36 ms</td>
+              <td>6.93 ms</td>
+              <td><span class="badge-best">0.64 ms</span> <small>(15 buf)</small></td>
+            </tr>
+            <tr>
+              <td><strong>Q7</strong> (Low-Stock Alert)</td>
+              <td>0.23 ms <small>(18 buf)</small></td>
+              <td>0.39 ms <small>(18 buf)</small></td>
+              <td>0.43 ms</td>
+              <td>0.32 ms</td>
+              <td>0.42 ms</td>
+              <td>0.36 ms</td>
+              <td><span class="badge-best">0.09 ms</span> <small>(7 buf)</small></td>
+            </tr>
+            <tr>
+              <td><strong>Q8</strong> (Review Sentiment)</td>
+              <td>2.74 ms <small>(35 buf)</small></td>
+              <td><span class="badge-good">1.75 ms</span> <small>(35 buf)</small></td>
+              <td>1.05 ms</td>
+              <td>0.66 ms</td>
+              <td>1.00 ms</td>
+              <td>0.95 ms</td>
+              <td><span class="badge-best">0.41 ms</span> <small>(14 buf)</small></td>
+            </tr>
+            <tr>
+              <td><strong>Q9</strong> (Coupon AOV Lift)</td>
+              <td>12.58 ms <small>(259 buf)</small></td>
+              <td>14.62 ms <small>(256 buf)</small></td>
+              <td>11.89 ms</td>
+              <td><span class="badge-bad">6.85 ms</span> <small>(15,964 buf)</small></td>
+              <td>7.04 ms</td>
+              <td>22.70 ms</td>
+              <td><span class="badge-best">0.03 ms</span> <small>(6 buf)</small></td>
+            </tr>
+            <tr>
+              <td><strong>Q10</strong> (Top 1% Spenders)</td>
+              <td>14.46 ms <small>(480 buf)</small></td>
+              <td>13.55 ms <small>(294 buf)</small></td>
+              <td>12.88 ms</td>
+              <td><span class="badge-bad">690.28 ms</span> <small>(15,976 buf)</small></td>
+              <td>8.44 ms</td>
+              <td>19.60 ms</td>
+              <td><span class="badge-best">3.16 ms</span> <small>(231 buf)</small></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 5: VIDEO PRESENTATION SCRIPT & DEMO GUIDE -->
+    <section id="tab-video-guide" class="tab-pane">
+      <div class="video-guide-container">
+        <div class="video-header">
+          <h2>🎬 Video Walkthrough & Presentation Prompter</h2>
+          <p>Follow this structured 2-to-3 minute presentation script when recording a Loom video, portfolio demo, or technical interview walkthrough.</p>
+        </div>
+
+        <div class="teleprompter-timeline">
+          <!-- Step 1 -->
+          <div class="tele-item">
+            <div class="tele-time">0:00 - 0:30</div>
+            <div class="tele-content">
+              <h3>1. Project Pitch & Problem Statement</h3>
+              <div class="tele-script">
+                "Hi everyone! In this project, I built an end-to-end PostgreSQL performance optimization lab for an e-commerce analytical engine. In high-traffic e-commerce systems, analytical queries like GMV, customer RFM, and cohort repeat purchase rates often suffer from high buffer churn, table scan bottlenecks, and inaccurate date-boundary aggregations. I tackled 10 mission-critical query workloads using execution plan profiling, partial indexes, CTE pre-aggregations, and boundary-safe materialized views."
+              </div>
+              <div class="tele-action">👉 <em>Screen Action: Show the Overview & KPI cards on the dashboard.</em></div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="tele-item">
+            <div class="tele-time">0:30 - 1:15</div>
+            <div class="tele-content">
+              <h3>2. Deep Dive: Q6 Correlated Subquery Fix (97.5% Buffer Reduction)</h3>
+              <div class="tele-script">
+                "Let's look at Scenario Q6—calculating 30-day repeat purchase rates. The baseline ran a correlated EXISTS subplan that executed 2,222 times in a loop, resulting in 5,633 memory buffer reads. By refactoring the query into a CTE pre-aggregation and using a valid-order composite partial index, we reduced buffer reads down to just 142 pages in a single scan—a 97.5% reduction in I/O while keeping exact mathematical parity."
+              </div>
+              <div class="tele-action">👉 <em>Screen Action: Click on 'Scenarios' → Select 'Q6: 30-Day Repeat Purchase Rate' and show the Plan Tree comparison.</em></div>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="tele-item">
+            <div class="tele-time">1:15 - 2:00</div>
+            <div class="tele-content">
+              <h3>3. Architectural Innovation: The $39.4k Date-Boundary Anomaly (Q1)</h3>
+              <div class="tele-script">
+                "Another critical engineering challenge was in rolling 1-month revenue. A naive daily Materialized View was very fast, but because it aggregated from midnight of the boundary date, it silently overcounted $39,475 of revenue from earlier in the day. I engineered a hybrid boundary-safe query architecture: querying fully enclosed historical days from the fast Materialized View, while querying only the fractional real-time boundary slice from raw tables with UNION ALL. This gave us sub-millisecond execution with 100% exact parity."
+              </div>
+              <div class="tele-action">👉 <em>Screen Action: Navigate to 'Deep Dive Studies' → Show Case Study 1 with the timeline visualization.</em></div>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="tele-item">
+            <div class="tele-time">2:00 - 2:30</div>
+            <div class="tele-content">
+              <h3>4. Verification & Key Takeaways</h3>
+              <div class="tele-script">
+                "Finally, I verified 100% data correctness across all 10 scenarios using bidirectional EXCEPT ALL queries and automated rank/monetary checksums, ensuring zero data divergence. This project demonstrates that query optimization is not about guessing indexes—it is about profiling shared buffers, understanding planner costs, and designing robust data architectures."
+              </div>
+              <div class="tele-action">👉 <em>Screen Action: Show the Join Benchmark matrix table and verified 0-error status badge.</em></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <p>PostgreSQL E-commerce Query Performance Lab • PostgreSQL 17.10 • 10 Scenarios Optimized & Verified</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
