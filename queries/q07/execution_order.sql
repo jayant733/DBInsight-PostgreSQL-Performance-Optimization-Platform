@@ -1,0 +1,6 @@
+-- Q7 Execution Sequence
+-- 01 -> 02 -> 03 -> 04 -> 05 -> 06 -> 07 -> 08 -> 08b -> 09 -> 10 -> 11 -> 12 -> 13
+-- 03: Create partial index with qty_on_hand < reorder_point predicate
+-- 08: Forced Bitmap Heap Scan comparison using partial index
+-- 09: Create/refresh Low-Stock Products MV (must REFRESH after inventory changes)
+-- 13: Bidirectional EXCEPT ALL validation between baseline and tuned results
