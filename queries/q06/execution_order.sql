@@ -1,0 +1,6 @@
+-- Q6 Execution Sequence
+-- 01 -> 02 -> 03 -> 04 -> 05 -> 06 -> 07 -> 08 -> 08b -> 09 -> 10 -> 11 -> 12 -> 13
+-- 05/06/07: Hash/Nested Loop/Merge Join comparisons between first purchases and subsequent orders
+-- 08: Forced Bitmap Heap Scan comparison using valid order partial index
+-- 09: Create/refresh MV storing customer first and subsequent purchase timestamps
+-- 13: Bidirectional EXCEPT ALL validation between baseline and tuned results
