@@ -1,0 +1,6 @@
+-- Q10 Execution Sequence
+-- 01 -> 02 -> 03 -> 04 -> 05 -> 06 -> 07 -> 08 -> 08b -> 09 -> 10 -> 11 -> 12 -> 13
+-- Sorts all 3,000 customers by lifetime_revenue and selects exactly 30 via ROW_NUMBER.
+-- Uses customer_id ASC as deterministic tie-breaker.
+-- 09: Create/refresh Customer Lifetime Revenue MV. Moving 60-day values are not stored in MV.
+-- 13: Bidirectional EXCEPT ALL validation between raw aggregation and order pre-aggregation
