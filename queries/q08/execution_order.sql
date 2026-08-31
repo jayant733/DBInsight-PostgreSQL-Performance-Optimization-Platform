@@ -1,0 +1,6 @@
+-- Q8 Execution Sequence
+-- 01 -> 02 -> 03 -> 04 -> 05 -> 06 -> 07 -> 08 -> 08b -> 09 -> 10 -> 11 -> 12 -> 13
+-- 03: Pre-aggregates reviews by product, joining products only for qualified items
+-- 08: Instructional experiment showing Bitmap unsuitability for full-table review aggregations
+-- 09: Create/refresh Product Review Statistics MV
+-- 13: Bidirectional EXCEPT ALL validation between baseline and tuned results
