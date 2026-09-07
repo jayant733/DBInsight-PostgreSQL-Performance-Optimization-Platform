@@ -125,6 +125,19 @@ ecom_analysis/
 
 Prepare a new PostgreSQL 17 database, then execute the schema and seed scripts in order. Detailed commands and query execution steps are documented in [docs/reproduction.md](docs/reproduction.md).
 
+## Dashboard and Live Query Analyzer
+
+Start the bundled database with `docker compose up -d`, then run `npm install`
+and `npm run dev` inside `dashboard-v2`. QueryLab PostgreSQL uses host port
+`5434` by default to avoid collisions with other local projects.
+
+The original Q1–Q10 pages remain recorded, reproducible case studies. The
+**Add new query** page is live: it accepts one read-only `SELECT`/`WITH`, runs a
+timed `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)`, gives conservative rule-based
+advice, verifies safe rewrite candidates with bidirectional `EXCEPT ALL`, and
+saves analyses in PostgreSQL. See [dashboard-v2/README.md](dashboard-v2/README.md)
+for setup and safety details.
+
 ## Limitations
 
 - Metrics in the representative results table reflect baseline experiment logs; newly reproduced metrics are maintained in separate documents.
